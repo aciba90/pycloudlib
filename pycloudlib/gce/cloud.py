@@ -158,8 +158,7 @@ class GCE(BaseCloud):
     def _query_image_list(
         self, release: str, project: str, name_filter: str, arch: str
     ):
-        """
-        Return full list of images in the given project that match the given filters
+        """Query full list of images.
 
         image list API docs:
         https://googleapis.github.io/google-api-python-client/docs/dyn/compute_v1.images.html#list
@@ -172,23 +171,31 @@ class GCE(BaseCloud):
         image list matching that filter.
         500 is the maximum allowed page size
         Then we can sort locally and grab the latest image.
-        """
 
+        Args:
+            release: string, Ubuntu release to look for
+            project: GCE project
+            name_filter: name to filter with
+            arch: images' architecture
+
+        Returns:
+            list of images matching the given filters
+        """
         filter_string = "(name={}) AND (architecture={})".format(
             name_filter, arch.upper()
         )
 
         # SPECIAL CASE
-        # Google didn't start including architecture in image descriptions until after
-        # xenial stopped getting published
+        # Google didn't start including architecture in image descriptions
+        # until after xenial stopped getting published.
         # All xenial images are x86_64, so:
         #   1. we can return early for non-x86_64 xenial queries
-        #   2. for xenial + x86_64 we don't include the architecture in the filter
+        #   2. for xenial + x86_64 we don't include the architecture in the
+        #      filter
         if release == "xenial":
             if arch != "x86_64":
                 return []
-            else:
-                filter_string = "name={}".format(name_filter)
+            filter_string = "name={}".format(name_filter)
 
         image_list = []
         page_token = ""
@@ -209,7 +216,10 @@ class GCE(BaseCloud):
             page_token = image_list_result.get("nextPageToken", None)
 
         self._log.debug(
-            'Fetched entire image list (%i results) matching "%s" in %i requests',
+            (
+                'Fetched entire image list (%i results) matching "%s" in %i'
+                " requests"
+            ),
             len(image_list),
             filter_string,
             reqs,

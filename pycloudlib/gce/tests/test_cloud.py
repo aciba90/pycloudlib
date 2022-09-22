@@ -1,7 +1,4 @@
 """Tests related to pycloudlib.gce.cloud module."""
-from io import StringIO
-from textwrap import dedent
-
 import mock
 import pytest
 
@@ -12,9 +9,18 @@ from pycloudlib.gce.cloud import GCE
 MPATH = "pycloudlib.gce.cloud."
 
 
+# pylint: disable=protected-access,missing-function-docstring
 class TestGCE:
+    """General GCE testing."""
+
     @pytest.mark.parametrize(
-        "release, arch, api_side_effects, expected_filter_calls, expected_image_list",
+        [
+            "release",
+            "arch",
+            "api_side_effects",
+            "expected_filter_calls",
+            "expected_image_list",
+        ],
         [
             ("xenial", "arm64", Exception(), [], []),
             (
@@ -57,7 +63,7 @@ class TestGCE:
             ),
         ],
     )
-    def test_query_image_list(
+    def test_query_image_list(  # noqa: D102
         self,
         release,
         arch,
@@ -110,7 +116,7 @@ class TestGCE:
     )
     @mock.patch(MPATH + "GCE._get_name_filter", return_value="name-filter")
     @mock.patch(MPATH + "GCE._get_project", return_value="project-name")
-    def test_daily_image_returns_latest_from_query(
+    def test_daily_image_returns_latest_from_query(  # noqa: D102
         self,
         m_get_project,
         m_get_name_filter,
