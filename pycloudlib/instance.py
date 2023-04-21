@@ -479,12 +479,15 @@ class BaseInstance(ABC):
         # over 20 minutes to start or restart, so we shouldn't lower
         # this timeout
         start = time.time()
-        end = start + 40 * 60
+        end = start + 5 * 60
         while time.time() < end:
-            with suppress(SSHException, OSError):
+            # with suppress(SSHException, OSError):
+            try:
                 boot_id = self.get_boot_id()
                 if not old_boot_id or boot_id != old_boot_id:
                     return
+            except (SSHException, OSError) as e:
+                logging.exception(e)
             time.sleep(1)
 
         raise PycloudlibTimeoutError(
